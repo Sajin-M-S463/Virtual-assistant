@@ -1,8 +1,7 @@
 import requests
-unirest.timeout(15) # 5s timeout
-RAPIDAPI_KEY  ="9ac726b243mshf1526d4a4856e28p1c37a8jsn2a37c4adf8a9" 
-url = "{{API_URL}}"
-RAPIDAPI_HOST = "<YOUR_RAPIDAPI_ENDPOINT>"
+RAPIDAPI_KEY  = "9ac726b243mshf1526d4a4856e28p1c37a8jsn2a37c4adf8a9" 
+#url =  "https://imdb8.p.rapidapi.com/title/auto-complete"
+RAPIDAPI_HOST =  "imdb8.p.rapidapi.com"
 search_string = ""
 movie_id = ""
 movie_title = ""
@@ -11,40 +10,53 @@ top_cast_name = list()
 top_crew_name = dict()
 api_error = False
 def search_movie(search_keyword):
-  response = unirest.get("https://imdb8.p.rapidapi.com/title/find?q="+search_keyword,
-    headers={
-      "imdb8.p.rapidapi.com": RAPIDAPI_HOST,
-      "9ac726b243mshf1526d4a4856e28p1c37a8jsn2a37c4adf8a9": RAPIDAPI_KEY,
-      "Content-Type": "application/json"
+  #titanic
+  #response =requests.request("GET", url, headers=headers, params=querystring) 
+  url = "https://imdb8.p.rapidapi.com/title/find"
+  querystring = {"q":"game of thr"}
+  headers={
+    "imdb8.p.rapidapi.com": RAPIDAPI_HOST,
+    "9ac726b243mshf1526d4a4856e28p1c37a8jsn2a37c4adf8a9": RAPIDAPI_KEY,
+    #"Content-Type": "application/json"
     }
-  )
+  #}
+  response =requests.request("GET", url, headers=headers, params=querystring) 
   return response
 def search_cast(title_id):
-  response = unirest.get("https://imdb8.p.rapidapi.com/title/get-top-cast?tconst=" + title_id,
-        headers={
-          "imdb8.p.rapidapi.com": RAPIDAPI_HOST,
-          "9ac726b243mshf1526d4a4856e28p1c37a8jsn2a37c4adf8a9": RAPIDAPI_KEY,
-          "Content-Type": "application/json"
+  
+  url = "https://imdb8.p.rapidapi.com/title/get-top-cast"
+  querystring = {"tconst":"tt0944947"} 
+  headers={
+    "imdb8.p.rapidapi.com": RAPIDAPI_HOST,
+    "9ac726b243mshf1526d4a4856e28p1c37a8jsn2a37c4adf8a9": RAPIDAPI_KEY,
+    "Content-Type": "application/json"
         }
-    )
+    #)
+  response = requests.request("GET", url, headers=headers, params=querystring)
   return response
 def search_character(movie_id,name_id):
-  response = unirest.get("https://imdb8.p.rapidapi.com/title/get-charname-list?currentCountry=US&marketplace=ATVPDKIKX0DER&purchaseCountry=US&id=" + name_id + "&tconst=" + movie_id,
-          headers={
-            "imdb8.p.rapidapi.com": RAPIDAPI_HOST,
-            "9ac726b243mshf1526d4a4856e28p1c37a8jsn2a37c4adf8a9": RAPIDAPI_KEY,
-            "Content-Type": "application/json"
-          }
-        )
+  
+  url = "https://imdb8.p.rapidapi.com/title/get-charname-list"
+  querystring = {"id":"nm3964231","tconst":"tt0944947","currentCountry":"US","marketplace":"ATVPDKIKX0DER","purchaseCountry":"US"}
+  headers={
+    "imdb8.p.rapidapi.com": RAPIDAPI_HOST,
+    "9ac726b243mshf1526d4a4856e28p1c37a8jsn2a37c4adf8a9": RAPIDAPI_KEY,
+    "Content-Type": "application/json"
+        }
+    #)
+  response = requests.request("GET", url, headers=headers, params=querystring)
   return response
 def search_crew(movie_id):
-  response = unirest.get("https://imdb8.p.rapidapi.com/title/get-top-crew?tconst=" + movie_id,
-        headers={
-          "imdb8.p.rapidapi.com": RAPIDAPI_HOST,
-          "9ac726b243mshf1526d4a4856e28p1c37a8jsn2a37c4adf8a9": RAPIDAPI_KEY,
-          "Content-Type": "application/json"
-        }
-      )
+  
+  url = "https://imdb8.p.rapidapi.com/title/get-top-crew"
+  querystring = {"tconst":"tt0944947"}
+  headers={
+    "imdb8.p.rapidapi.com": RAPIDAPI_HOST,
+    "9ac726b243mshf1526d4a4856e28p1c37a8jsn2a37c4adf8a9": RAPIDAPI_KEY,
+    "Content-Type": "application/json"
+      }
+    #)
+  response = requests.request("GET", url, headers=headers, params=querystring)
   return response
 def display_results():
   if api_error == False:
@@ -64,10 +76,10 @@ def display_results():
 if __name__ == "__main__":
   try:
     while len(search_string) <= 2:
-      search_string = raw_input("Enter the movie name to search: ")
+      search_string = input("Enter the movie name to search: ")
     print ("Finding the best match for " + search_string + "...  n")
     main_response = search_movie(search_string)
-    if(main_response.code == 200):
+    if(main_response.status_code == 200):
       if "results" in main_response.body:
         
         best_match = main_response.body["results"][0]
@@ -78,7 +90,7 @@ if __name__ == "__main__":
         movie_year = str(best_match["year"])
         
         cast_response = search_cast(movie_id)
-        if(cast_response.code == 200):
+        if(cast_response.status_code == 200):
           top_cast_id = cast_response.body[0:4]
           for cast_id in top_cast_id:
             
@@ -88,7 +100,7 @@ if __name__ == "__main__":
             else:
               print ("Cannot fetch the star cast for " + movie_title)
           crew_response = search_crew(movie_id)
-          if crew_response.code == 200:
+          if crew_response.status_code == 200:
             for crew,details in crew_response.body.items():
               
               if len(details) > 0:
